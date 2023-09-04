@@ -1,7 +1,7 @@
-'use strict';
+"use strict"; // consulted https://stackoverflow.com/questions/31391760/use-strict-needed-in-a-typescript-file
 const qs = require("querystring");
-const _ = require("lodash"); // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
-const pagination = module.exports;
+const _ = require("lodash");
+let pagination = module.exports;
 pagination.create = function (currentPage, pageCount, queryObj) {
     if (pageCount <= 1) {
         return {
@@ -15,9 +15,9 @@ pagination.create = function (currentPage, pageCount, queryObj) {
             pageCount: 1,
         };
     }
-    pageCount = parseInt(pageCount.toString(), 10);
+    pageCount = parseInt((pageCount).toString(), 10);
     let pagesToShow = [1, 2, pageCount - 1, pageCount];
-    currentPage = parseInt(currentPage.toString(), 10) || 1;
+    currentPage = parseInt((currentPage).toString(), 10) || 1;
     const previous = Math.max(1, currentPage - 1);
     const next = Math.min(pageCount, currentPage + 1);
     let startPage = Math.max(1, currentPage - 2);
@@ -28,10 +28,10 @@ pagination.create = function (currentPage, pageCount, queryObj) {
     for (i = 0; i < 5; i += 1) {
         pagesToShow.push(startPage + i);
     }
-    pagesToShow = _.uniq(pagesToShow).filter(page => page > 0 && page <= pageCount).sort((a, b) => a - b);
+    const pagesFiltered = _.uniq(pagesToShow).filter((page) => page > 0 && page <= pageCount).sort((a, b) => a - b);
     queryObj = Object.assign({}, (queryObj || {}));
     delete queryObj._;
-    const pages = pagesToShow.map((page) => {
+    const pages = pagesFiltered.map((page) => {
         queryObj.page = page;
         return { page: page, active: page === currentPage, qs: qs.stringify(queryObj) };
     });
@@ -53,7 +53,6 @@ pagination.create = function (currentPage, pageCount, queryObj) {
         first: { page: 0, active: false, qs: "" },
         last: { page: 0, active: false, qs: "" },
     };
-    // const data = { rel: [], pages: pages, currentPage: currentPage, pageCount: pageCount };
     queryObj.page = previous;
     data.prev = { page: previous, active: currentPage > 1, qs: qs.stringify(queryObj) };
     queryObj.page = next;
