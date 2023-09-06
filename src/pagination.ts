@@ -1,31 +1,48 @@
-"use strict"; // consulted https://stackoverflow.com/questions/31391760/use-strict-needed-in-a-typescript-file
-
 import * as qs from 'querystring';
 import * as _ from 'lodash'; // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
 
-interface pagination {
-    create(currentPage:number, pageCount:number, queryObj:Record<string, any>): Data
+
+interface Pagination {
+    create(currentPage:number, pageCount:number, queryObj:Record<string, number>): Data
 }
 
-const pagination:pagination = module.exports;
+// eslint-disable-next-line
+const pagination:Pagination = module.exports;
 
 interface Data { // referenced https://blog.logrocket.com/types-vs-interfaces-typescript/
     prev: Item,
     next: Item,
     first: Item,
     last: Item,
-    rel: any[],
-    pages: any[],
+    rel: Item[],
+    pages: (Page)[],
     currentPage: number,
     pageCount: number,
 }
 
 interface Item {
-    page:number,
-    active:boolean,
+    page?: number,
+    active?: boolean,
+    separator?: boolean,
+    qs?: string,
+    rel?: string,
+    href?: string,
 }
 
-pagination.create = function (currentPage:number, pageCount:number, queryObj:any): Data {
+interface Page {
+    page?: number,
+    active?: boolean,
+    qs?: string,
+    separator?: boolean,
+}
+
+// interface Separator {
+//     separator: boolean,
+//     splice(i:number, o:number, sep:Item)
+// }
+
+// function create(currentPage:number, pageCount:number, queryObj:Record<string, number>) {
+pagination.create = function (currentPage:number, pageCount:number, queryObj:Record<string, number>): Data {
     if (pageCount <= 1) {
         return {
             prev: { page: 1, active: currentPage > 1 },
@@ -54,13 +71,15 @@ pagination.create = function (currentPage:number, pageCount:number, queryObj:any
         pagesToShow.push(startPage + i);
     }
 
-    const pagesFiltered:number[] = _.uniq(pagesToShow).filter((page:number) => page > 0 && page <= pageCount).sort((a:number, b:number) => a - b);
+    // tslint:disable-next-line:max-line-length
+    const pagesFiltered:number[] = (_.uniq(pagesToShow).filter((page:number) => page > 0 &&
+        page <= pageCount).sort((a:number, b:number) => a - b));
 
     queryObj = { ...(queryObj || {}) };
 
     delete queryObj._;
 
-    const pages:any[] = pagesFiltered.map((page:number) => {
+    const pages:Page[] = pagesFiltered.map((page:number) => {
         queryObj.page = page;
         return { page: page, active: page === currentPage, qs: qs.stringify(queryObj) };
     });
@@ -69,19 +88,20 @@ pagination.create = function (currentPage:number, pageCount:number, queryObj:any
         if (pages[i].page - 2 === pages[i - 1].page) {
             pages.splice(i, 0, { page: pages[i].page - 1, active: false, qs: qs.stringify(queryObj) });
         } else if (pages[i].page - 1 !== pages[i - 1].page) {
-            pages.splice(i, 0, { separator: true });
+            const sepPage:Page = { separator: true };
+            pages.splice(i, 0, sepPage);
         }
     }
 
-    const data = {
+    const data: Data = {
         rel: [],
         pages: pages,
         currentPage: currentPage,
         pageCount: pageCount,
-        prev: { page: 0, active: false, qs: '' },
-        next: { page: 0, active: false, qs: '' },
-        first: { page: 0, active: false, qs: '' },
-        last: { page: 0, active: false, qs: '' },
+        prev: { page: 0, active: false },
+        next: { page: 0, active: false },
+        first: { page: 0, active: false },
+        last: { page: 0, active: false },
     };
 
     queryObj.page = previous;
@@ -109,3 +129,4 @@ pagination.create = function (currentPage:number, pageCount:number, queryObj:any
     }
     return data;
 };
+// } export = create;

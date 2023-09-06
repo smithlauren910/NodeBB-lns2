@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -25,7 +25,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const qs = __importStar(require("querystring"));
 const _ = __importStar(require("lodash")); // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
+// eslint-disable-next-line
 const pagination = module.exports;
+// interface Separator {
+//     separator: boolean,
+//     splice(i:number, o:number, sep:Item)
+// }
+// function create(currentPage:number, pageCount:number, queryObj:Record<string, number>) {
 pagination.create = function (currentPage, pageCount, queryObj) {
     if (pageCount <= 1) {
         return {
@@ -52,7 +58,9 @@ pagination.create = function (currentPage, pageCount, queryObj) {
     for (i = 0; i < 5; i += 1) {
         pagesToShow.push(startPage + i);
     }
-    const pagesFiltered = _.uniq(pagesToShow).filter((page) => page > 0 && page <= pageCount).sort((a, b) => a - b);
+    // tslint:disable-next-line:max-line-length
+    const pagesFiltered = (_.uniq(pagesToShow).filter((page) => page > 0 &&
+        page <= pageCount).sort((a, b) => a - b));
     queryObj = Object.assign({}, (queryObj || {}));
     delete queryObj._;
     const pages = pagesFiltered.map((page) => {
@@ -64,24 +72,19 @@ pagination.create = function (currentPage, pageCount, queryObj) {
             pages.splice(i, 0, { page: pages[i].page - 1, active: false, qs: qs.stringify(queryObj) });
         }
         else if (pages[i].page - 1 !== pages[i - 1].page) {
-            pages.splice(i, 0, { separator: true });
+            const sepPage = { separator: true };
+            pages.splice(i, 0, sepPage);
         }
     }
-    // interface Data {
-    //     rel: any[],
-    //     pages: any[],
-    //     currentPage: number,
-    //     pageCount: number
-    // }
     const data = {
         rel: [],
         pages: pages,
         currentPage: currentPage,
         pageCount: pageCount,
-        prev: { page: 0, active: false, qs: '' },
-        next: { page: 0, active: false, qs: '' },
-        first: { page: 0, active: false, qs: '' },
-        last: { page: 0, active: false, qs: '' },
+        prev: { page: 0, active: false },
+        next: { page: 0, active: false },
+        first: { page: 0, active: false },
+        last: { page: 0, active: false },
     };
     queryObj.page = previous;
     data.prev = { page: previous, active: currentPage > 1, qs: qs.stringify(queryObj) };
@@ -105,3 +108,4 @@ pagination.create = function (currentPage, pageCount, queryObj) {
     }
     return data;
 };
+// } export = create;
