@@ -1,22 +1,31 @@
 "use strict"; // consulted https://stackoverflow.com/questions/31391760/use-strict-needed-in-a-typescript-file
 
-const qs = require("querystring")
-const _ = require("lodash")
+import * as qs from 'querystring';
+import * as _ from 'lodash'; // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
 
-let pagination = module.exports;
+interface pagination {
+    create(currentPage:number, pageCount:number, queryObj:Record<string, any>): Data
+}
 
-interface Pagination {
-    prev: { page: number, active: boolean },
-    next: { page: number, active: boolean },
-    first: { page: number, active: boolean },
-    last: { page: number, active: boolean },
+const pagination:pagination = module.exports;
+
+interface Data { // referenced https://blog.logrocket.com/types-vs-interfaces-typescript/
+    prev: Item,
+    next: Item,
+    first: Item,
+    last: Item,
     rel: any[],
     pages: any[],
     currentPage: number,
     pageCount: number,
 }
 
-pagination.create = function (currentPage:number, pageCount:number, queryObj:any): Pagination {
+interface Item {
+    page:number,
+    active:boolean,
+}
+
+pagination.create = function (currentPage:number, pageCount:number, queryObj:any): Data {
     if (pageCount <= 1) {
         return {
             prev: { page: 1, active: currentPage > 1 },
@@ -30,7 +39,7 @@ pagination.create = function (currentPage:number, pageCount:number, queryObj:any
         };
     }
     pageCount = parseInt((pageCount).toString(), 10);
-    let pagesToShow:number[] = [1, 2, pageCount - 1, pageCount];
+    const pagesToShow:number[] = [1, 2, pageCount - 1, pageCount];
 
     currentPage = parseInt((currentPage).toString(), 10) || 1;
     const previous = Math.max(1, currentPage - 1);
@@ -64,15 +73,15 @@ pagination.create = function (currentPage:number, pageCount:number, queryObj:any
         }
     }
 
-    const data = { 
-        rel: [], 
-        pages: pages, 
-        currentPage: currentPage, 
+    const data = {
+        rel: [],
+        pages: pages,
+        currentPage: currentPage,
         pageCount: pageCount,
-        prev: { page: 0, active: false, qs: "" },
-        next: { page: 0, active: false, qs: "" },
-        first: { page: 0, active: false, qs: "" },
-        last: { page: 0, active: false, qs: "" },
+        prev: { page: 0, active: false, qs: '' },
+        next: { page: 0, active: false, qs: '' },
+        first: { page: 0, active: false, qs: '' },
+        last: { page: 0, active: false, qs: '' },
     };
 
     queryObj.page = previous;

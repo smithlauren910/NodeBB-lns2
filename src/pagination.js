@@ -1,7 +1,31 @@
-"use strict"; // consulted https://stackoverflow.com/questions/31391760/use-strict-needed-in-a-typescript-file
-const qs = require("querystring");
-const _ = require("lodash");
-let pagination = module.exports;
+'use strict';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const qs = __importStar(require("querystring"));
+const _ = __importStar(require("lodash")); // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
+const pagination = module.exports;
 pagination.create = function (currentPage, pageCount, queryObj) {
     if (pageCount <= 1) {
         return {
@@ -16,7 +40,7 @@ pagination.create = function (currentPage, pageCount, queryObj) {
         };
     }
     pageCount = parseInt((pageCount).toString(), 10);
-    let pagesToShow = [1, 2, pageCount - 1, pageCount];
+    const pagesToShow = [1, 2, pageCount - 1, pageCount];
     currentPage = parseInt((currentPage).toString(), 10) || 1;
     const previous = Math.max(1, currentPage - 1);
     const next = Math.min(pageCount, currentPage + 1);
@@ -43,15 +67,21 @@ pagination.create = function (currentPage, pageCount, queryObj) {
             pages.splice(i, 0, { separator: true });
         }
     }
+    // interface Data {
+    //     rel: any[],
+    //     pages: any[],
+    //     currentPage: number,
+    //     pageCount: number
+    // }
     const data = {
         rel: [],
         pages: pages,
         currentPage: currentPage,
         pageCount: pageCount,
-        prev: { page: 0, active: false, qs: "" },
-        next: { page: 0, active: false, qs: "" },
-        first: { page: 0, active: false, qs: "" },
-        last: { page: 0, active: false, qs: "" },
+        prev: { page: 0, active: false, qs: '' },
+        next: { page: 0, active: false, qs: '' },
+        first: { page: 0, active: false, qs: '' },
+        last: { page: 0, active: false, qs: '' },
     };
     queryObj.page = previous;
     data.prev = { page: previous, active: currentPage > 1, qs: qs.stringify(queryObj) };
