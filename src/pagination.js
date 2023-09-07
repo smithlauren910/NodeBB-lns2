@@ -23,14 +23,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// eslint-disable-next-line
 const qs = __importStar(require("querystring"));
+// eslint-disable-next-line
 const _ = __importStar(require("lodash")); // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
 // eslint-disable-next-line
 const pagination = module.exports;
-// interface Separator {
-//     separator: boolean,
-//     splice(i:number, o:number, sep:Item)
-// }
 // function create(currentPage:number, pageCount:number, queryObj:Record<string, number>) {
 pagination.create = function (currentPage, pageCount, queryObj) {
     if (pageCount <= 1) {
@@ -58,7 +56,7 @@ pagination.create = function (currentPage, pageCount, queryObj) {
     for (i = 0; i < 5; i += 1) {
         pagesToShow.push(startPage + i);
     }
-    // tslint:disable-next-line:max-line-length
+    // references https://stackoverflow.com/questions/508269/how-do-i-break-a-string-across-more-than-one-line-of-code-in-javascript
     const pagesFiltered = (_.uniq(pagesToShow).filter((page) => page > 0 &&
         page <= pageCount).sort((a, b) => a - b));
     queryObj = Object.assign({}, (queryObj || {}));
