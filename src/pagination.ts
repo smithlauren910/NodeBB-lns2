@@ -1,36 +1,45 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 // eslint-disable-next-line
-const qs = __importStar(require("querystring"));
+import * as qs from 'querystring';
 // eslint-disable-next-line
-const _ = __importStar(require("lodash")); // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
+import * as _ from 'lodash'; // referenced https://github.com/DefinitelyTyped/DefinitelyTyped/issues/7903
+
+
+interface Pagination {
+    create(currentPage:number, pageCount:number, queryObj:Record<string, number>): Data
+}
+
 // eslint-disable-next-line
-const pagination = module.exports;
+const pagination:Pagination = module.exports;
+
+interface Data { // referenced https://blog.logrocket.com/types-vs-interfaces-typescript/
+    prev: Item,
+    next: Item,
+    first: Item,
+    last: Item,
+    rel: Item[],
+    pages: (Page)[],
+    currentPage: number,
+    pageCount: number,
+}
+
+interface Item {
+    page?: number,
+    active?: boolean,
+    separator?: boolean,
+    qs?: string,
+    rel?: string,
+    href?: string,
+}
+
+interface Page {
+    page?: number,
+    active?: boolean,
+    qs?: string,
+    separator?: boolean,
+}
+
 // function create(currentPage:number, pageCount:number, queryObj:Record<string, number>) {
-pagination.create = function (currentPage, pageCount, queryObj) {
+pagination.create = function (currentPage:number, pageCount:number, queryObj:Record<string, number>): Data {
     if (pageCount <= 1) {
         return {
             prev: { page: 1, active: currentPage > 1 },
@@ -44,37 +53,44 @@ pagination.create = function (currentPage, pageCount, queryObj) {
         };
     }
     pageCount = parseInt((pageCount).toString(), 10);
-    const pagesToShow = [1, 2, pageCount - 1, pageCount];
+    const pagesToShow:number[] = [1, 2, pageCount - 1, pageCount];
+
     currentPage = parseInt((currentPage).toString(), 10) || 1;
     const previous = Math.max(1, currentPage - 1);
     const next = Math.min(pageCount, currentPage + 1);
-    let startPage = Math.max(1, currentPage - 2);
+
+    let startPage:number = Math.max(1, currentPage - 2);
     if (startPage > pageCount - 5) {
         startPage -= 2 - (pageCount - currentPage);
     }
-    let i;
+    let i:number;
     for (i = 0; i < 5; i += 1) {
         pagesToShow.push(startPage + i);
     }
+
     // references https://stackoverflow.com/questions/508269/how-do-i-break-a-string-across-more-than-one-line-of-code-in-javascript
-    const pagesFiltered = (_.uniq(pagesToShow).filter((page) => page > 0 &&
-        page <= pageCount).sort((a, b) => a - b));
-    queryObj = Object.assign({}, (queryObj || {}));
+    const pagesFiltered:number[] = (_.uniq(pagesToShow).filter((page:number) => page > 0 &&
+        page <= pageCount).sort((a:number, b:number) => a - b));
+
+    queryObj = { ...(queryObj || {}) };
+
     delete queryObj._;
-    const pages = pagesFiltered.map((page) => {
+
+    const pages:Page[] = pagesFiltered.map((page:number) => {
         queryObj.page = page;
         return { page: page, active: page === currentPage, qs: qs.stringify(queryObj) };
     });
+
     for (i = pages.length - 1; i > 0; i -= 1) {
         if (pages[i].page - 2 === pages[i - 1].page) {
             pages.splice(i, 0, { page: pages[i].page - 1, active: false, qs: qs.stringify(queryObj) });
-        }
-        else if (pages[i].page - 1 !== pages[i - 1].page) {
-            const sepPage = { separator: true };
+        } else if (pages[i].page - 1 !== pages[i - 1].page) {
+            const sepPage:Page = { separator: true };
             pages.splice(i, 0, sepPage);
         }
     }
-    const data = {
+
+    const data: Data = {
         rel: [],
         pages: pages,
         currentPage: currentPage,
@@ -84,24 +100,28 @@ pagination.create = function (currentPage, pageCount, queryObj) {
         first: { page: 0, active: false },
         last: { page: 0, active: false },
     };
+
     queryObj.page = previous;
     data.prev = { page: previous, active: currentPage > 1, qs: qs.stringify(queryObj) };
     queryObj.page = next;
     data.next = { page: next, active: currentPage < pageCount, qs: qs.stringify(queryObj) };
+
     queryObj.page = 1;
     data.first = { page: 1, active: currentPage === 1, qs: qs.stringify(queryObj) };
     queryObj.page = pageCount;
     data.last = { page: pageCount, active: currentPage === pageCount, qs: qs.stringify(queryObj) };
+
     if (currentPage < pageCount) {
         data.rel.push({
             rel: 'next',
-            href: `?${qs.stringify(Object.assign(Object.assign({}, queryObj), { page: next }))}`,
+            href: `?${qs.stringify({ ...queryObj, page: next })}`,
         });
     }
+
     if (currentPage > 1) {
         data.rel.push({
             rel: 'prev',
-            href: `?${qs.stringify(Object.assign(Object.assign({}, queryObj), { page: previous }))}`,
+            href: `?${qs.stringify({ ...queryObj, page: previous })}`,
         });
     }
     return data;
